@@ -1,0 +1,112 @@
+<section>
+    <div class="container mt-5">
+        <form action="" id="checkout-form">
+            <div class="row">
+                <div class="col-md-6">
+                    <h2>Enter Delivery Details</h2><br>
+                    <div>
+                        <label for="">Address</label>
+                        <input class="form-control" type="text" id="address" name="address" value="{{user.Address}}">
+
+                         <label for="">Pincode</label>
+                        <input class="form-control" type="text" id="pincode" name="pincode" value="{{user.Pincode}}">
+
+                         <label for="">Mobile</label>
+                        <input class="form-control" type="text" id="mobile" name="mobile" value="{{user.Mobile}}">
+                        <input type="text" name="userId" id="" value="{{user._id}}" hidden>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="container mt-5 ml-5 checkout">
+                        <h5>Total Amount: Rs: {{total}}</h5>
+                        <hr>
+                        <div class="payment">
+                            <p>Payment Method</p>
+                            <label class="radio-inline">
+                                <input type="radio" name="payment-method" value="COD" checked>COD
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="payment-method" value="ONLINE"> Online payment
+                            </label>
+                            <button class="btn btn-primary float-right mt-3" type="submit" >Checkout</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</section>
+<script>
+    $("#checkout-form").submit((e)=>{
+        e.preventDefault()
+        $.ajax({
+            url:'/place-order',
+            method:'post',
+            data:$('#checkout-form').serialize(),
+            success:(response)=>{
+                //alert(response)
+                if(response.codSuccess){
+                    location.href = '/order-success'
+                }else{
+                    razorpayPayment(response)
+                }
+            }
+        })
+    })
+    function razorpayPayment(order){
+         const options = {
+        "key": 'rzp_test_SN3dIh7DcfGhpS', // Replace with your Razorpay key_id
+        "amount": order.amount, // Amount is in currency subunits.
+        "currency": 'INR',
+       "name": 'Anaswara',
+        "description": 'Test Transaction',
+        "order_id": order.id, // This is the order_id created in the backend
+       "handler": function(response){
+                    //alert(response.razorpay_payment_id);
+                    // alert(response.razorpay_order_id);
+                     // alert(response.razorpay_signature);
+                    console.log('RESPONSE',response)
+                    if(response && response.razorpay_payment_id){
+                      verifyPayment(response,order)
+                    }else{
+                        console.error('Invalid response from razorpay')
+                    }
+       },
+        prefill: {
+          name: '',
+          email: '',
+          contact: ''
+        },
+        theme: {
+          color: '#F37254'
+         }
+     }
+     var rzp1 = new Razorpay(options)
+     rzp1.open()
+    }
+    function verifyPayment(payment,order){
+        $.ajax({
+            url:'/verify-payment',
+            data:{
+                payment:{
+                     razorpay_payment_id:payment.razorpay_payment_id,
+                     razorpay_order_id:payment.razorpay_order_id,
+                     razorpay_signature:payment.razorpay_signature
+
+                },
+                order
+            },
+            method:'post',
+            success:(response)=>{
+                if(response.status){
+                    location.href = '/order-success'
+                }else{
+                    alert('payment failed')
+                    location.href ='/cart'
+                }
+            }
+        })
+    }
+</script>

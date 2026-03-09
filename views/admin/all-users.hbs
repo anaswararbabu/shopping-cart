@@ -1,0 +1,30 @@
+<section>
+    <div class="container">
+
+        <div class="row mt-4">
+             <h2>ALL USERS</h2>
+        </div>
+<table class="table table-bordered mt-3" id="usersTable">
+    <thead class="thead-dark">
+    <tr>
+        <th>User ID</th>
+        <th>Name</th>
+        <th>Email</th>
+    </tr>
+    </thead>
+    {{#each users}}
+    <tr>
+        <td>{{this._id}}</td>
+        <td>{{this.Name}}</td>
+        <td>{{this.Email}}</td>
+    </tr>
+    {{/each}}
+</table>
+</div>
+
+</section>
+<script>
+     $(function(){
+    $('#usersTable').DataTable();
+  })
+</script>

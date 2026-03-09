@@ -1,0 +1,58 @@
+<section>
+    <div class="container">
+        <div class="row mt-4">
+            <h2>ALL ORDERS</h2>
+        </div>
+    <table  class="table table-bordered mt-3 " id="ordersTable">
+        <thead class="thead-dark">
+        <tr>
+            <th>ORDER ID</th>
+            <th>USER</th>
+            <th>Email</th>
+            <th>TOTAL PRICE</th>
+            <th>STATUS</th>
+            <th>STATUS UPDATE</th>
+        </tr>
+        </thead>
+        {{#each orders}}
+        <tr>
+            <td>{{this._id}}</td>
+            <td>{{this.user.Name}}</td>
+            <td>{{this.user.Email}}</td>
+            <td>Rs. {{this.totalAmount}}</td>
+            <td>
+                <span class="badge badge-info">{{this.status}}</span>
+            </td>
+            <td>
+                <select class="form-control" onchange="changeStatus('{{this._id}}',this.value)">
+                    <option>Placed</option>
+                    <option>Shipped</option>
+                    <option>Out for Delivery</option>
+                    <option>Delivered</option>
+                </select>
+            </td>
+        </tr>
+        {{/each}}
+    </table>
+    </div>
+</section>
+
+<script>
+     $(function(){
+    $('#ordersTable').DataTable();
+  })
+    function changeStatus(orderId,status){
+        $.ajax({
+            url:'/admin/change-order-status',
+            method:'post',
+            data:{
+                orderId:orderId,
+                status:status
+            },
+            success:(response)=>{
+                alert('Order Status Updated')
+                location.reload()
+            }
+        })
+    }
+</script>

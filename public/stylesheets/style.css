@@ -1,0 +1,32 @@
+.tracking-wrap{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+.step{
+    width: 140px;
+    height: 40px;
+    background: #e0e0e0;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #555;
+    position: relative;
+    z-index: 2;
+}
+.step.active{
+    background: linear-gradient(45deg,#28a745,#4caf50);
+    color: white;
+}
+.line{
+    width: 60px;
+    height: 4px;
+    background: #ccc;
+}
+.line.active{
+    background: #28a745;
+}
+

@@ -1,0 +1,113 @@
+<section>
+    <div class="container mt-5">
+        <h2>Ordered Products</h2>
+        <div class="mb-4">
+        <h5>Order Status :
+            <span class="badge {{#if (eq orders.status 'Cancelled')}}badge-danger{{else}}badge-info{{/if}}">
+            {{orders.status}}
+            </span>
+        </h5>
+        <div class="d-flex gap-3 mt-2">
+            <button class="btn btn-primary me-3 " onclick="trackOrder('{{orders._id}}')">
+             Track Order
+            </button>
+            <div id ="tracking-section" class="mb-5"></div>
+
+         {{#if (eq orders.status "placed")}}
+         <button class="btn btn-danger me-3 " onclick="cancelOrder('{{orders._id}}')">
+         Cancel Order
+         </button>
+         {{/if}}
+         </div>
+     </div>  
+
+        <div class="row">
+            {{#each products}}
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4">
+               <div class="card" style="width: 15rem; height:22rem ;object-fit :cover">
+                        <img class="card-img-top "
+                            src="/images/product-images/{{this.product._id}}.jpeg"
+                            alt="Card image cap"
+                            style="height:15rem">
+                        <div class="card-body">
+                            <h5 class="card-title">{{this.product.Name}}</h5>
+                            <p class="card-text">Rs.{{this.product.Price}}</p>
+                            <p class="card-text">Quantity:{{this.quantity}}</p>
+                          </div>
+                    </div> 
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</section>
+
+<script>
+    function trackOrder(orderId){
+        $.ajax({
+            url:'/track-order/'+orderId,
+            method:'get',
+            success:(order)=>{
+                let status = order.status
+                let placed="",shipped="",out="",delivered=""
+                let line1="",line2="",line3=""
+                if(status=='placed'){
+                    placed="active"
+                }
+                if(status=='Shipped'){
+                    placed="active"
+                    shipped="active"
+                    line1="active"
+                }
+                if(status=='Out for Delivery'){
+                    placed="active"
+                    shipped="active"
+                    out="active"
+                    line1="active"
+                    line2="active"
+                }
+                if(status=='Delivered'){
+                    placed="active"
+                    shipped="active"
+                    out="active"
+                    delivered="active"
+                    line1="active"
+                    line2="active"
+                    line3="active"
+                }
+
+                let html = `
+                    <div class = "tracking-wrap">
+                        <div class = "step ${placed}">Placed</div>
+                        <div class ="line ${line1}" ></div>
+
+                         <div class = "step ${shipped}">Shipped</div>
+                        <div class ="line ${line2}"></div>
+
+                         <div class = "step ${out}">Out for Delivery</div>
+                        <div class ="line ${line3}"></div>
+
+                         <div class = "step ${delivered}">Delivered</div>
+                        
+                    </div>
+                `
+
+                $('#tracking-section').html(html)
+            }
+        })
+    }
+    function cancelOrder(orderId){
+        if(confirm("Are you sure want to cancel this order?")){
+            $.ajax({
+                url:'/cancel-order/'+orderId,
+                method:'post',
+                success:(response)=>{
+                    console.log(response)
+                    if(response.status){
+                        alert("Order Cancelled Successfully")
+                        location.reload()
+                    }
+                }
+            })
+        }
+    }
+</script>

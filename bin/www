@@ -1,12 +1,3 @@
-#!/usr/bin/env node
-
-/**
- * Module dependencies.
- */
-
-
-
-
 var app = require('../app');
 var debug = require('debug')('shoppingcart:server');
 var http = require('http');
@@ -22,11 +13,14 @@ app.set('port', port);
 /**
  * Create HTTP server.
  */
-
-
-
 var server = http.createServer(app);
 
+db.connect((err) => {
+  if (err) {
+    console.log("Database connection failed");
+    process.exit(1);
+  } else {
+    console.log("Database connected");
 /**
  * Listen on provided port, on all network interfaces.
  */
@@ -35,7 +29,8 @@ server.listen(port);
 adminHelpers.createAdmin();
 server.on('error', onError);
 server.on('listening', onListening);
-
+}
+});
 /**
  * Normalize a port into a number, string, or false.
  */

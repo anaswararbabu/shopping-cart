@@ -1,26 +1,24 @@
-const mongoClient = require('mongodb').MongoClient;
+
+const { MongoClient } = require('mongodb');
+
 const state = { db: null };
 
-module.exports.connect = (done) => {
-    const url = process.env.MONGO_URL; // <-- use env variable
-    if (!url) return done(new Error("MongoDB URL not defined!"));
+module.exports.connect = async (done) => {
+  const url = process.env.MONGO_URL;
+  if (!url) {
+    console.error("MongoDB URL not defined!");
+    return done(new Error("MongoDB URL not defined!"));
+  }
 
-    mongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
-        .then((client) => {
-            state.db = client.db();
-            console.log("Db connected successfully");
-            done();
-        })
-        .catch((err) => {
-            console.error("Db connection failed", err);
-            done(err);
-        });
+  try {
+    const client = await MongoClient.connect(url); // <--- no options
+    state.db = client.db(); // default DB from URL
+    console.log("Database connected successfully");
+    done();
+  } catch (err) {
+    console.error("Db connection failed", err);
+    done(err);
+  }
 };
 
-module.exports.get = () => {
-    if (!state.db) {
-        console.error("Db not available");
-        return null;
-    }
-    return state.db;
-};
+module.exports.get = () => state.db;

@@ -7,16 +7,6 @@ var hbs = require('express-handlebars')
 var fileUpload = require('express-fileupload')
 var db = require('./configuration/connection');
 var session = require('express-session');
-
-db.connect((err)=>{
-  if(err)
-    console.log("Connection error"+err)
-  else
-  console.log("Database connected Successfully to port 27017");
-  
-});
-
-
 var userRouter = require('./routes/user');
 var adminRouter = require('./routes/admin');
 const { request } = require('http');

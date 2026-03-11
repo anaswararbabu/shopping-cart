@@ -90,12 +90,26 @@ router.post('/add-product', verifyAdminLogin, async (req, res) => {
 
 });
 
-router.get('/delete-product/:id',(req,res)=>{
-  let proId = req.params.id;
-  console.log(proId);
-  productHelpers.deleteProduct(proId).then((response)=>{
-    res.redirect('/admin/view-products')
+router.get('/delete-product/:id', verifyAdminLogin, async (req,res)=>{
+
+  let proId = req.params.id
+
+  productHelpers.getProductDetails(proId).then(async(product)=>{
+
+    if(product.image){
+
+      const publicId = product.image.split('/').pop().split('.')[0]
+
+      await cloudinary.uploader.destroy("products/"+publicId)
+
+    }
+
+    productHelpers.deleteProduct(proId).then(()=>{
+      res.redirect('/admin/view-products')
+    })
+
   })
+
 })
 
 router.get('/edit-product/:id',verifyAdminLogin,async(req,res)=>{
@@ -104,17 +118,30 @@ router.get('/edit-product/:id',verifyAdminLogin,async(req,res)=>{
   res.render('admin/edit-product',{product,admin:true})
 })
 
-router.post('/edit-product/:id',verifyAdminLogin,(req,res)=>{
- // console.log(req.params.id);
-  let id = req.params.id
-  productHelpers.updateProduct(id,req.body).then(()=>{
-    
-    if(req.files && req.files.Image){
+router.post('/edit-product/:id', verifyAdminLogin, async (req, res) => {
+
+  try {
+
+    if (req.files && req.files.Image) {
+
       let image = req.files.Image
-      image.mv('./public/images/product-images/'+id+'.jpeg')
+
+      const result = await cloudinary.uploader.upload(image.tempFilePath, {
+        folder: "products"
+      })
+
+      req.body.image = result.secure_url
     }
+
+    productHelpers.updateProduct(req.params.id, req.body).then(() => {
+      res.redirect('/admin/view-products')
+    })
+
+  } catch (err) {
+    console.log("Edit product error:", err)
     res.redirect('/admin/view-products')
-  })
+  }
+
 })
 
 router.get('/all-orders',verifyAdminLogin,async(req,res)=>{

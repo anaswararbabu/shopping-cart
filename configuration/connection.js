@@ -1,36 +1,31 @@
-const mongoClient=require('mongodb').MongoClient
+const { MongoClient } = require('mongodb');
 
 const state = { db: null };
 
-module.exports.connect =  (done) => {
-  const url = process.env.MONGO_URL;
-   const dbname = 'shopping';
+module.exports.connect = async (done) => {
+    const url = process.env.MONGO_URL;
+    const dbname = 'shopping';
 
-    /*mongoClient.connect(url,(err,data)=>{
-        if(err)
-            return done(err);
-        state.db = data.db(dbname)
-        console.log('Db connected');
-        done();
-    })*/
-
-    mongoClient.connect(url)
-    .then((data)=>{
-        state.db=data.db(dbname)
-        console.log('Db connected successfully')
-        done()
-    })
-    .catch((err)=>{
-        console.error('Db connection failed')
-        done(err)
-    })
-    
-}
-
-module.exports.get = function(){
-     if(!state.db){
-        console.error('Db not available')
-        return null
+    if (!url) {
+        console.error("MongoDB URL not defined!");
+        return done(new Error("MongoDB URL not defined!"));
     }
-    return state.db
+
+    try {
+        const client = await MongoClient.connect(url); // v5+ no options needed
+        state.db = client.db(dbname);
+        console.log('Db connected successfully');
+        done();
+    } catch (err) {
+        console.error('Db connection failed', err);
+        done(err);
+    }
+};
+
+module.exports.get = function () {
+    if (!state.db) {
+        console.error('Db not available');
+        return null;
+    }
+    return state.db;
 }

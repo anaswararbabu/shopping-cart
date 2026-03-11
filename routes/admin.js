@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var productHelpers = require('../helpers/product-helpers');
 var adminHelpers = require('../helpers/admin-helpers')
+const cloudinary = require('../configuration/cloudinary')
 /* GET users listing. */
 
 const verifyAdminLogin = (req,res,next)=>{
@@ -62,23 +63,29 @@ router.get("/add-product",verifyAdminLogin,function(req,res){
   res.render('admin/add-product',{admin:true})
 });
 
-router.post('/add-product',verifyAdminLogin,(req,res)=>{
-  console.log(req.body);
-  console.log(req.files.Image);
+router.post('/add-product',verifyAdminLogin,async(req,res)=>{
+  let image = req.files.Image
 
-  productHelpers.addProduct(req.body,(id)=>{
-    let image = req.files.Image;
-    console.log(id);
+  const result = await cloudinary.uploader.upload(image.tempFilePath, {
+    folder: "products"
+  })
+
+  req.body.image = result.secure_url
     
-    image.mv('./public/images/product-images/'+id+'.jpeg',(err,done)=>{
+  productHelpers.addProduct(req.body,(id)=>{
+    res.redirect('/admin/view-products')
+   // let image = req.files.Image;
+    //console.log(id);
+    
+  /*  image.mv('./public/images/product-images/'+id+'.jpeg',(err,done)=>{
       if(!err){
         res.redirect('/admin/view-products')
       }else{
         console.log(err);
         
       }
-    })
-    
+    })*/
+   
   })
 })
 

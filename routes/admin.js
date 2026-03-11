@@ -63,31 +63,32 @@ router.get("/add-product",verifyAdminLogin,function(req,res){
   res.render('admin/add-product',{admin:true})
 });
 
-router.post('/add-product',verifyAdminLogin,async(req,res)=>{
-  let image = req.files.Image
+router.post('/add-product', verifyAdminLogin, async (req, res) => {
 
-  const result = await cloudinary.uploader.upload(image.tempFilePath, {
-    folder: "products"
-  })
+  try {
 
-  req.body.image = result.secure_url
-    
-  productHelpers.addProduct(req.body,(id)=>{
-    res.redirect('/admin/view-products')
-   // let image = req.files.Image;
-    //console.log(id);
-    
-  /*  image.mv('./public/images/product-images/'+id+'.jpeg',(err,done)=>{
-      if(!err){
-        res.redirect('/admin/view-products')
-      }else{
-        console.log(err);
-        
-      }
-    })*/
-   
-  })
-})
+    if (!req.files || !req.files.Image) {
+      return res.send("Image not uploaded");
+    }
+
+    let image = req.files.Image;
+
+    const result = await cloudinary.uploader.upload(image.tempFilePath, {
+      folder: "products"
+    });
+
+    req.body.image = result.secure_url;
+
+    productHelpers.addProduct(req.body, (id) => {
+      res.redirect('/admin/view-products');
+    });
+
+  } catch (err) {
+    console.error("Add product error:", err);
+    res.send("Product upload failed");
+  }
+
+});
 
 router.get('/delete-product/:id',(req,res)=>{
   let proId = req.params.id;

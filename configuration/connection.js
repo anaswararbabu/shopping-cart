@@ -4,7 +4,7 @@ const state = { db: null };
 
 module.exports.connect = async (done) => {
     const url = process.env.MONGO_URL;
-    const dbname = 'shopping';
+    const dbname = 'shoppingCart';
 
     if (!url) {
         console.error("MongoDB URL not defined!");
